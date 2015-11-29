@@ -15,4 +15,4 @@ By touching the flowers, we can visualize the difference between the structure a
 
 ## Preview
 
-![](https://github.com/nicola/poem-flower-poem/blob/master/preview.png)
+![](https://raw.githubusercontent.com/nicola/poem-flower-time/master/preview.png)
