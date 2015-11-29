@@ -1,0 +1,182 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>7*7 Flowers poem</title>
+  <meta charset="utf-8">
+  <style type="text/css">
+  svg {
+    margin: 0 auto;
+    display: block;
+  }
+  h1 {
+    text-align: center;
+    margin-top: 40px;
+    margin-bottom: 80px;
+  }
+  </style>
+</head>
+<body>
+
+  <h1>Time changes how we look, not who we are</h1>
+
+<script src="d3.v3.min.js"></script>
+<script src="d3-grid.js"></script>
+<script>
+
+var ratio = window.innerWidth / 1635
+var rwidth = 1435 * ratio
+    width = rwidth  /2,
+    height = 500 * ratio,
+    petals = 40,
+    halfRadius = 16 * ratio;
+
+var size = d3.scale.sqrt()
+  .domain([0, 1])
+  .range([0, halfRadius]);
+  
+var grid = d3.layout.grid()
+  .size([width - halfRadius * 6, height - halfRadius * 6]);
+
+var pie = d3.layout.pie()
+  .sort(null)
+  .value(function(d) { return d.size; });
+
+var svg = d3.select("body").append("svg")
+    .attr("width", rwidth)
+    .attr("height", height)
+  .append("g")
+    .attr("transform", "translate(" + halfRadius * 3 + "," + halfRadius * 3 + ")");
+
+var data = d3.range(49).map(function(d, i) {
+  return {
+    id: d,
+    petals: d3.range(i).map(function(d) { return {size: 0.5}; })
+  }
+});
+
+var flower = svg.append('g')
+  .attr("class", "fl1")
+  .attr("transform", function(d, i) { 
+    return "translate(" + width/2 + ",0)";
+  })
+  .selectAll('.flower')
+  .data(grid(data))
+.enter().append('g')
+  .attr("class", "flower")
+  .attr("transform", function(d, i) { 
+      return "translate(" + d.x + "," + d.y + ")"; 
+    });
+  
+var petal = flower.selectAll(".petal")
+  .data(function(d) { return pie(d.petals); })
+.enter().append("path")
+  .attr("class", "petal")
+  .attr("transform", function(d) { return r((d.startAngle + d.endAngle) / 2); })
+  .attr("d", petalPath)
+  .style("stroke", petalStroke)
+  .style("fill", petalFill);
+
+var flower2 = svg.append('g')
+  .attr("class", "fl2")
+  .attr("transform", function(d, i) { 
+    return "translate(" + width/2 + ",0)";
+  })
+  .selectAll('.flower2')
+  .data(grid(data))
+.enter().append('g')
+  .attr("class", "flower2")
+  .attr("transform", function(d, i) { 
+      return "translate(" + d.x+ "," + d.y + ")"; 
+    });
+
+var petal2 = flower2.selectAll(".petal2")
+  .data(function(d) { return pie(d.petals); })
+.enter().append("path")
+  .attr("class", "petal2")
+  .attr("transform", function(d) { return r((d.startAngle + d.endAngle) / 2); })
+  .attr("d", petalPath)
+  .style("stroke", "#000")
+  .style("fill", "#fff");
+
+var on = false;
+svg.on("mouseover", function() {
+  console.log("mouse")
+
+  if (on) {
+    return
+  }
+
+  d3.select(".fl1")
+  .transition()
+  .attr("transform", function(d) { 
+    console.log("trna")
+      return "translate(" + 0 + ",0)"; 
+    });
+
+  d3.select(".fl2")
+    .transition()
+    .attr("transform", function(d) { 
+      console.log("trna")
+        return "translate(" + width + ",0)"; 
+      });
+
+  on = true
+})
+
+
+setInterval(update, 2000)
+
+function update() {
+  data.forEach(function(flower) {
+    flower.petals.forEach(function(d) { d.size = Math.random(); });
+  });
+
+  flower.data(grid(data), function(d) { return d.id; }).transition().delay(function(d, i) { return 1000 + i * 20; }).duration(2000)
+    .attr("transform", function(d, i) { 
+      return "translate(" + d.x + "," + d.y + ")"; 
+    });
+  
+  petal.data(function(d) { return pie(d.petals); }).transition().duration(2000)
+    .attr("transform", function(d) { return r((d.startAngle + d.endAngle) / 2); })
+    .attr("d", petalPath);
+}
+
+function petalPath(d) {
+  var angle = (d.endAngle - d.startAngle) / 2,
+      s = polarToCartesian(-angle, halfRadius),
+      e = polarToCartesian(angle, halfRadius),
+      r = size(d.data.size),
+      m = {x: halfRadius + r, y: 0},
+      c1 = {x: halfRadius + r / 2, y: s.y},
+      c2 = {x: halfRadius + r / 2, y: e.y};
+  return "M0,0L" + s.x + "," + s.y + "Q" + c1.x + "," + c1.y + " " + m.x + "," + m.y + "L" + m.x + "," + m.y + "Q" + c2.x + "," + c2.y + " " + e.x + "," + e.y + "Z";
+};
+
+function petalFill(d, i) {
+  return d3.hcl(i / petals * 360, 60, 70);
+};
+
+function petalStroke(d, i) {
+  return d3.hcl(i / petals * 360, 60, 40);
+};
+
+function flowerSum(d) {
+  return d3.sum(d.petals, function(d) { return d.size; });
+}
+
+function r(angle) {
+  return "rotate(" + (angle / Math.PI * 180) + ")";
+}
+
+function polarToCartesian(angle, radius) {
+  return {
+    x: Math.cos(angle) * radius,
+    y: Math.sin(angle) * radius
+  };
+};
+
+
+</script>
+</body>
+</html>
